@@ -2,6 +2,14 @@
 name = "abduco"
 version = "0.1.0"
 edition = "2021"
+authors = ["Syed Fasiuddin <syedfasiuddin.02@gmail.com>"]
+license = "MIT"
+description = "Placeholder for abduco rewrite in Rust"
+homepage = "https://github.com/SyedFasiuddin/abduco"
+documentation = "https://docs.rs/abduco"
+repository = "https://github.com/SyedFasiuddin/abduco"
+readme = "README"
+keywords = ["abduco"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
