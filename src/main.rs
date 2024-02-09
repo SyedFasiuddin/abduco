@@ -1,9 +1,11 @@
+#![allow(unused_variables, unused_assignments)]
+
 use std::env;
-use std::process::exit;
 use std::process::ExitCode;
 
-fn usage() {
-    println!("usage");
+fn usage() -> ExitCode {
+    println!("usage: abduco [-a|-A|-c|-n] [-r] [-l] [-f] [-e detachkey] name command");
+    ExitCode::FAILURE
 }
 
 fn list_sessions() -> ExitCode {
@@ -27,26 +29,85 @@ fn session_exists() -> bool {
 fn main() -> ExitCode {
     let mut args = env::args();
     let _program = args.next().expect("program name");
-    let args = args.collect::<Vec<_>>();
+    let mut args = args.collect::<Vec<_>>();
+    args.reverse();
 
     if args.is_empty() {
         return list_sessions();
     }
-    let mut action = ' ';
 
-    for arg in args {
-        match arg.as_str() {
-            "-a" => action = 'a',
-            "-A" => action = 'A',
-            "-c" => action = 'c',
-            "-n" => action = 'n',
-            "-v" => {
-                println!("abduco-0.0.1 © 2024 Syed Fasiuddin");
-                exit(0);
+    let mut action = ' ';
+    let mut force = false;
+    let mut passthrough = false;
+    let mut quiet = false;
+    let mut key = ' ';
+    let mut handle_e = false;
+
+    while let Some(arg) = args.pop() {
+        if !arg.starts_with("-") {
+            if handle_e {
+                let mut chars = arg.chars();
+                if let Some(x) = chars.next()  {
+                    if x == '^' {
+                        if let Some(x) = chars.next() {
+                            // TODO handle CTRL key
+                            key = x;
+                        }
+                    }
+                    key = x;
+                }
+                handle_e = false;
             }
-            _ => usage(),
+
+            args.push(arg);
+            break;
+        }
+        let mut chars = arg.chars();
+        while let Some(ch) = chars.next() {
+            match ch {
+                '-' => continue,
+                'a' => action = 'a',
+                'A' => action = 'A',
+                'c' => action = 'c',
+                'n' => action = 'n',
+                'e' => {
+                    if let Some(x) = chars.next() {
+                        if x == '^' {
+                            if let Some(x) = chars.next() {
+                                // TODO handle CTRL key
+                                key = x;
+                            }
+                        }
+                        key = x;
+                    } else {
+                        handle_e = true;
+                    }
+                    break;
+                }
+                'f' => force = true,
+                'p' => passthrough = true,
+                'q' => quiet = true,
+                'r' => todo!("readonly"),
+                'l' => todo!("low priority"),
+                'v' => {
+                    let version = env!("CARGO_PKG_VERSION");
+                    println!("abduco-{version} © 2024 Syed Fasiuddin");
+                    return ExitCode::SUCCESS;
+                }
+                x => return usage(),
+            }
         }
     }
+
+    let mut session_name = String::new();
+    if let Some(name) = args.pop() {
+        session_name = name;
+    }
+    let mut command = String::new();
+    if let Some(name) = args.pop() {
+        command = name;
+    }
+    args.reverse();
 
     match action {
         'A' => {
@@ -77,7 +138,7 @@ fn main() -> ExitCode {
             }
             create_session();
         }
-        x => unreachable!("unknown action {x}"),
+        _ => return usage(),
     }
 
     ExitCode::SUCCESS
