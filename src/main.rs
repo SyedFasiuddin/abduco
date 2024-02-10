@@ -9,6 +9,8 @@ macro_rules! CTRL {
     }
 }
 
+const ABDUCO_CMD: &'static str = "dvtm";
+
 fn usage() -> ExitCode {
     println!("usage: abduco [-a|-A|-c|-n] [-r] [-l] [-f] [-e detachkey] name command");
     ExitCode::FAILURE
@@ -106,15 +108,18 @@ fn main() -> ExitCode {
         }
     }
 
-    let mut session_name = String::new();
-    if let Some(name) = args.pop() {
-        session_name = name;
+    let session_name = match args.pop() {
+        Some(name) => name,
+        None => return usage(),
+    };
+
+    let command = match args.pop() {
+        Some(name) => name,
+        None => ABDUCO_CMD.to_string(),
+    };
+    if !args.is_empty() {
+        args.reverse();
     }
-    let mut command = String::new();
-    if let Some(name) = args.pop() {
-        command = name;
-    }
-    args.reverse();
 
     match action {
         'A' => {
