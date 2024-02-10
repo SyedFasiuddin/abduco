@@ -19,16 +19,16 @@ fn list_sessions() -> ExitCode {
     ExitCode::SUCCESS
 }
 
-fn create_session() {
-    println!("create_session");
+fn create_session(session_name: &str) {
+    println!("create_session: {session_name}");
 }
 
-fn attach_session() {
-    println!("attach_session");
+fn attach_session(session_name: &str) {
+    println!("attach_session: {session_name}");
 }
 
-fn session_exists() -> bool {
-    println!("session_exists");
+fn session_exists(session_name: &str) -> bool {
+    println!("session_exists: {session_name}");
     false
 }
 
@@ -118,32 +118,32 @@ fn main() -> ExitCode {
 
     match action {
         'A' => {
-            if !session_exists() {
-                create_session();
+            if !session_exists(&session_name) {
+                create_session(&session_name);
             }
-            attach_session();
+            attach_session(&session_name);
         }
         'a' => {
-            if !session_exists() {
+            if !session_exists(&session_name) {
                 eprintln!("error: session does not exist");
                 return ExitCode::FAILURE;
             }
-            attach_session();
+            attach_session(&session_name);
         }
         'c' => {
-            if session_exists() {
+            if session_exists(&session_name) {
                 eprintln!("error: session already exist");
                 return ExitCode::FAILURE;
             }
-            create_session();
-            attach_session();
+            create_session(&session_name);
+            attach_session(&session_name);
         }
         'n' => {
-            if session_exists() {
+            if session_exists(&session_name) {
                 eprintln!("error: session already exist");
                 return ExitCode::FAILURE;
             }
-            create_session();
+            create_session(&session_name);
         }
         _ => return usage(),
     }
