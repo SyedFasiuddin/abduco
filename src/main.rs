@@ -3,6 +3,12 @@
 use std::env;
 use std::process::ExitCode;
 
+macro_rules! CTRL {
+    ( $ch:expr ) => {
+        $ch as u8 & 0x1F
+    }
+}
+
 fn usage() -> ExitCode {
     println!("usage: abduco [-a|-A|-c|-n] [-r] [-l] [-f] [-e detachkey] name command");
     ExitCode::FAILURE
@@ -40,7 +46,8 @@ fn main() -> ExitCode {
     let mut force = false;
     let mut passthrough = false;
     let mut quiet = false;
-    let mut key = ' ';
+
+    let mut key_detach = CTRL!('\\');
     let mut handle_e = false;
 
     while let Some(arg) = args.pop() {
@@ -50,11 +57,11 @@ fn main() -> ExitCode {
                 if let Some(x) = chars.next()  {
                     if x == '^' {
                         if let Some(x) = chars.next() {
-                            // TODO handle CTRL key
-                            key = x;
+                            key_detach = CTRL!(x);
                         }
+                    } else {
+                        key_detach = x as u8;
                     }
-                    key = x;
                 }
                 handle_e = false;
             }
@@ -74,11 +81,11 @@ fn main() -> ExitCode {
                     if let Some(x) = chars.next() {
                         if x == '^' {
                             if let Some(x) = chars.next() {
-                                // TODO handle CTRL key
-                                key = x;
+                                key_detach = CTRL!(x);
                             }
+                        } else {
+                            key_detach = x as u8;
                         }
-                        key = x;
                     } else {
                         handle_e = true;
                     }
